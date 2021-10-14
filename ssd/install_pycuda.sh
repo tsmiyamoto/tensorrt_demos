@@ -4,7 +4,7 @@
 
 set -e
 
-if ! which nvcc > /dev/null; then
+if ! which /usr/local/cuda/bin/nvcc > /dev/null; then
   echo "ERROR: nvcc not found"
   exit
 fi

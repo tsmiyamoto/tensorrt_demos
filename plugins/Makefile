@@ -2,7 +2,7 @@ CC=g++
 LD=ld
 CXXFLAGS=-Wall -std=c++11 -g -O
 
-NVCC=nvcc
+NVCC=/usr/local/cuda/bin/nvcc
 
 # space separated compute values ex: computes=70 75. If not present will fetch device's CC
 computes=
