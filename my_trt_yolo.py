@@ -118,7 +118,7 @@ def parse_args():
     return args
 
 
-def loop_and_detect(cam, trt_yolo, conf_th):
+def loop_and_detect(cam, trt_yolo, conf_th, vis):
     """Continuously capture images from camera and do object detection.
 
     # Arguments
@@ -142,8 +142,10 @@ def loop_and_detect(cam, trt_yolo, conf_th):
             class_no = clss.tolist()
             class_list = [COCO_CLASSES_LIST[i] for i in class_no]
             print(class_list)
-            time.sleep(15)
+            img = vis.draw_bboxes(img, boxes, confs, clss)
             cv2.imwrite('test.jpg', img)
+            time.sleep(15)
+            
 
             # img = vis.draw_bboxes(img, boxes, confs, clss)
             # img = show_fps(img, fps)
@@ -174,14 +176,14 @@ def main():
     if not cam.isOpened():
         raise SystemExit('ERROR: failed to open camera!')
 
-    cls_dict = get_cls_dict(args.category_num)
+    cls_dict = {i: n for i, n in enumerate(COCO_CLASSES_LIST)}
     vis = BBoxVisualization(cls_dict)
     trt_yolo = TrtYOLO(args.model, args.category_num, args.letter_box)
 
     # open_window(
     #     WINDOW_NAME, 'Camera TensorRT YOLO Demo',
     #     cam.img_width, cam.img_height)
-    loop_and_detect(cam, trt_yolo, conf_th=0.3)
+    loop_and_detect(cam, trt_yolo, conf_th=0.3, vis=vis)
 
     cam.release()
     # cv2.destroyAllWindows()
