@@ -252,6 +252,12 @@ I developed my "yolo_layer" plugin by referencing similar plugin code by [wang-x
 
 Assuming this repository has been cloned at "${HOME}/project/tensorrt_demos", follow these steps:
 
+0. 
+```shell
+$ sudo apt install -y protobuf-compiler libprotoc-dev
+$ pip3 install -U pip
+```
+
 1. Install "pycuda" in case you haven't done so in Demo #3.  Note that the installation script resides in the "ssd" folder.
 
    ```shell
@@ -262,8 +268,11 @@ Assuming this repository has been cloned at "${HOME}/project/tensorrt_demos", fo
 2. Install **version "1.4.1" (not the latest version)** of python3 **"onnx"** module.  Note that the "onnx" module would depend on "protobuf" as stated in the [Prerequisite](#prerequisite) section.  Reference: [information provided by NVIDIA](https://devtalk.nvidia.com/default/topic/1052153/jetson-nano/tensorrt-backend-for-onnx-on-jetson-nano/post/5347666/#5347666).
 
    ```shell
-   $ sudo pip3 install onnx==1.4.1
+   $ pip3 install -U protobuf
+   $ pip3 install numpy
+   $ pip3 install onnx==1.4.1
    ```
+   numpyのインストール中にエラーが出ることもあるが、`pip freeze`するときちんと入っている。
 
 3. Go to the "plugins/" subdirectory and build the "yolo_layer" plugin.  When done, a "libyolo_layer.so" would be generated.
 
