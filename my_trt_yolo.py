@@ -1,10 +1,13 @@
 import os
 import time
 import argparse
+import collections
+import json
 
 import cv2
 import pycuda.autoinit  # This is needed for initializing CUDA driver
 import numpy as np
+import requests
 
 from utils.yolo_classes import get_cls_dict
 from utils.camera import add_camera_args, Camera
@@ -12,89 +15,7 @@ from utils.display import open_window, set_display, show_fps
 from utils.visualization import BBoxVisualization
 from utils.yolo_with_plugins import TrtYOLO
 
-COCO_CLASSES_LIST = [
-    'croissant',
-    'bicycle',
-    'car',
-    'motorbike',
-    'aeroplane',
-    'bus',
-    'train',
-    'truck',
-    'boat',
-    'traffic light',
-    'fire hydrant',
-    'stop sign',
-    'parking meter',
-    'bench',
-    'bird',
-    'cat',
-    'dog',
-    'horse',
-    'sheep',
-    'cow',
-    'elephant',
-    'bear',
-    'zebra',
-    'giraffe',
-    'backpack',
-    'umbrella',
-    'handbag',
-    'tie',
-    'suitcase',
-    'frisbee',
-    'skis',
-    'snowboard',
-    'sports ball',
-    'kite',
-    'baseball bat',
-    'baseball glove',
-    'skateboard',
-    'surfboard',
-    'tennis racket',
-    'bottle',
-    'wine glass',
-    'cup',
-    'fork',
-    'knife',
-    'spoon',
-    'bowl',
-    'banana',
-    'apple',
-    'sandwich',
-    'orange',
-    'broccoli',
-    'carrot',
-    'hot dog',
-    'pizza',
-    'donut',
-    'cake',
-    'chair',
-    'sofa',
-    'pottedplant',
-    'bed',
-    'diningtable',
-    'toilet',
-    'tvmonitor',
-    'laptop',
-    'mouse',
-    'remote',
-    'keyboard',
-    'cell phone',
-    'microwave',
-    'oven',
-    'toaster',
-    'sink',
-    'refrigerator',
-    'book',
-    'clock',
-    'vase',
-    'scissors',
-    'teddy bear',
-    'hair drier',
-    'toothbrush',
-]
-
+COCO_CLASSES_LIST = ['croissant', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'sofa', 'pottedplant', 'bed', 'diningtable', 'toilet', 'tvmonitor', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
 def parse_args():
     """Parse input arguments."""
     desc = ('Capture and display live camera video, while doing '
@@ -117,6 +38,15 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+def count_cls_from_list(class_list):
+    count = collections.Counter(class_list)
+    return dict(count)
+
+def send_data_to_endpoint(data_dict):
+    endpoint = 'http://unified.soracom.io'
+    payload = json.dumps(data_dict)
+    response = requests.post(endpoint, json=payload)
+    print(response.json())
 
 def loop_and_detect(cam, trt_yolo, conf_th, vis):
     """Continuously capture images from camera and do object detection.
@@ -142,6 +72,7 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis):
             class_no = clss.tolist()
             class_list = [COCO_CLASSES_LIST[i] for i in class_no]
             print(class_list)
+            send_data_to_endpoint(count_cls_from_list(class_list))
             img = vis.draw_bboxes(img, boxes, confs, clss)
             cv2.imwrite('test.jpg', img)
             time.sleep(15)
@@ -163,7 +94,6 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis):
             #     set_display(WINDOW_NAME, full_scrn)
         except KeyboardInterrupt:
             break
-
 
 def main():
     args = parse_args()
