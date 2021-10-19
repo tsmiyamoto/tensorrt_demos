@@ -131,6 +131,7 @@ def grab_img(cam):
     """
     while cam.thread_running:
         _, cam.img_handle = cam.cap.read()
+        cam.img_handle = cv2.flip(cam.img_handle, 0)
         if cam.img_handle is None:
             #logging.warning('Camera: cap.read() returns None...')
             break
@@ -211,6 +212,10 @@ class Camera():
 
         # Try to grab the 1st image and determine width and height
         _, self.img_handle = self.cap.read()
+
+        # 反転
+        # self.img_handle = cv2.rotate(self.img_handle, cv2.ROTATE_180)
+        # self.img_handle = cv2.flip(self.img_handle, 0)
         if self.img_handle is None:
             logging.warning('Camera: cap.read() returns no image!')
             self.is_opened = False
@@ -253,8 +258,6 @@ class Camera():
             if img is not None and self.do_resize:
                 img = cv2.resize(img, (self.img_width, self.img_height))
 
-                # 反転
-                img = cv2.rotate(img, cv2.ROTATE_180)
             return img
         elif self.cap == 'image':
             return np.copy(self.img_handle)
