@@ -252,6 +252,9 @@ class Camera():
                 _, img = self.cap.read()
             if img is not None and self.do_resize:
                 img = cv2.resize(img, (self.img_width, self.img_height))
+
+                # 反転
+                img = cv2.rotate(img, cv2.ROTATE_180)
             return img
         elif self.cap == 'image':
             return np.copy(self.img_handle)
@@ -260,6 +263,9 @@ class Camera():
                 return self.img_handle.copy()
             else:
                 return self.img_handle
+
+    # def saveImg(self):
+    #     _, img = self.cap.read
 
     def release(self):
         self._stop()
