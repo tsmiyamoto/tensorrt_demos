@@ -131,7 +131,8 @@ def grab_img(cam):
     """
     while cam.thread_running:
         _, cam.img_handle = cam.cap.read()
-        cam.img_handle = cv2.flip(cam.img_handle, 0)
+        # 反転（正解）
+        # cam.img_handle = cv2.flip(cam.img_handle, 0)
         if cam.img_handle is None:
             #logging.warning('Camera: cap.read() returns None...')
             break

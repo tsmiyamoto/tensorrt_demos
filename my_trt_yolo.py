@@ -43,10 +43,15 @@ def count_cls_from_list(class_list):
     return dict(count)
 
 def send_data_to_endpoint(data_dict):
-    endpoint = 'http://unified.soracom.io'
+    headers = {'Content-Type': 'application/json'}
+    endpoint = 'http://uni.soracom.io'
     payload = json.dumps(data_dict)
-    response = requests.post(endpoint, json=payload)
-    print(response.json())
+    try: 
+        response = requests.post(endpoint, json=payload, headers=headers, timeout=(3.0))
+        print(response.json())
+    except requests.exceptions.Timeout as e:
+        print(e)
+        pass
 
 def loop_and_detect(cam, trt_yolo, conf_th, vis):
     """Continuously capture images from camera and do object detection.
@@ -75,7 +80,7 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis):
             send_data_to_endpoint(count_cls_from_list(class_list))
             img = vis.draw_bboxes(img, boxes, confs, clss)
             cv2.imwrite('test.jpg', img)
-            time.sleep(15)
+            time.sleep(5)
             
 
             # img = vis.draw_bboxes(img, boxes, confs, clss)
