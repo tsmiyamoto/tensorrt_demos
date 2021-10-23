@@ -15,7 +15,7 @@ from utils.display import open_window, set_display, show_fps
 from utils.visualization import BBoxVisualization
 from utils.yolo_with_plugins import TrtYOLO
 
-COCO_CLASSES_LIST = ['croissant', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'sofa', 'pottedplant', 'bed', 'diningtable', 'toilet', 'tvmonitor', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+COCO_CLASSES_LIST = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'sofa', 'pottedplant', 'bed', 'diningtable', 'toilet', 'tvmonitor', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
 def parse_args():
     """Parse input arguments."""
     desc = ('Capture and display live camera video, while doing '
@@ -38,16 +38,21 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+def dict2json(dict):
+    return json.dumps(dict).replace("\\", "")
+
 def count_cls_from_list(class_list):
     count = collections.Counter(class_list)
+    # return dict2json(dict(count))
     return dict(count)
 
 def send_data_to_endpoint(data_dict):
     headers = {'Content-Type': 'application/json'}
     endpoint = 'http://uni.soracom.io'
     payload = json.dumps(data_dict)
+    print(payload)
     try: 
-        response = requests.post(endpoint, json=payload, headers=headers, timeout=(3.0))
+        response = requests.post(endpoint, data=payload, headers=headers, timeout=(3.0))
         print(response.json())
     except requests.exceptions.Timeout as e:
         print(e)
@@ -75,6 +80,7 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis):
             boxes, confs, clss = trt_yolo.detect(img, conf_th)
             clss = clss.astype(np.int)
             class_no = clss.tolist()
+            print(class_no)
             class_list = [COCO_CLASSES_LIST[i] for i in class_no]
             print(class_list)
             send_data_to_endpoint(count_cls_from_list(class_list))
